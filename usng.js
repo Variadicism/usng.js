@@ -409,20 +409,9 @@
             const c = (1 - f) * Math.log(eatanhe(1, es));
 
             const taupf = function(tau, es) {
-              const numit = 5;
-              const tol = sqrt(Number.EPSILON) / 10;
-              const e2m = 1 - es * es;
-              const stol = tol * max(1, abs(taup));
-              let tau = taup/e2m;
-              for (let i = 0; i < numit; ++i) {
-                const taupa = taupf(tau, es);
-                const dtau = (taup - taupa) * (1 + e2m * tau * tau) /
-                    ( e2m * Math.hypot(1, tau) * Math.hypot(1, taupa) );
-                tau += dtau;
-                if (!(Math.abs(dtau) >= stol))
-                  break;
-              }
-              return tau;
+              const tau1 = Math.hypot(1, tau);
+              const sig = Math.sinh(eatanhe(tau / tau1, es));
+              return Math.hypot(1, sig) * tau - sig * tau1;
             }
 
             const northp = lat > 0;
@@ -433,8 +422,8 @@
             rho = taup >= 0 ? lat !== 90 ? 1/rho : 0 : rho;
             rho *= 2 * k0 * a / c;
             const k = lat !== 90 ? (rho / a) * secphi * sqrt(e2m + e2 / (secphi * secphi)) : k0;
-            const x = Math.sin(x * this.DEG_2_RAD) * rho;
-            const y = Math.cos(y * this.DEG_2_RAD) * rho * (northp ? -1 : 1);
+            const x = Math.sin(lon * this.DEG_2_RAD) * rho;
+            const y = Math.cos(lon * this.DEG_2_RAD) * rho * (northp ? -1 : 1);
 
             return {
                 northing: y + falseNorthing,
