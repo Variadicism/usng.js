@@ -382,6 +382,19 @@
             return result;
         },
 
+        serializeUPS({northp, easting, northing}) {
+            return `${northp ? 'Z' : 'B'} ${easting}mE ${northing}mN` 
+        },
+           
+        deserializeUPS(str) {
+            const [zone, easting, northing] = str.split(" ")
+            return {
+                northp: zone === "Z" ? true : false,
+                easting: Number(easting.slice(0, -2)),
+                northing: Number(northing.slice(0, -2))
+            }
+        },
+
         /***************** convert latitude, longitude to UPS  *******************
         Uses "arctic" boolean instead of returning a negative Northing value
 
