@@ -382,6 +382,67 @@
             return result;
         },
 
+        /***************** convert latitude, longitude to UPS  *******************
+        Uses "arctic" boolean instead of returning a negative Northing value
+
+        Input latitide is expected to be [-90, 90].
+        Input longitude is expected to be [-180, 180].
+
+        This returns an object describing the UPS coordinates:
+        { northing: number, easting: number, arctic: bool }
+        ***************************************************************************/
+        LLtoUPS: function(lat, lon) {
+            const a = 6378137;
+            const f = 1/298.257223563;
+            const k0 = 0.9996;
+            const e2 = f * (2 - f);
+            const es = (f < 0 ? -1 : 1) * Math.sqrt(Math.abs(e2));
+            const e2m = 1 - e2;
+
+            const falseNorthing = 2000000;
+            const falseEasting = 2000000;
+
+            const eatanhe = function(tau, es) {
+              return es > 0 ? es * Math.atanh(es * x) : -es * Math.atan(es * x);
+            }
+
+            const c = (1 - f) * Math.log(eatanhe(1, es));
+
+            const taupf = function(tau, es) {
+              const numit = 5;
+              const tol = sqrt(Number.EPSILON) / 10;
+              const e2m = 1 - es * es;
+              const stol = tol * max(1, abs(taup));
+              let tau = taup/e2m;
+              for (let i = 0; i < numit; ++i) {
+                const taupa = taupf(tau, es);
+                const dtau = (taup - taupa) * (1 + e2m * tau * tau) /
+                    ( e2m * Math.hypot(1, tau) * Math.hypot(1, taupa) );
+                tau += dtau;
+                if (!(Math.abs(dtau) >= stol))
+                  break;
+              }
+              return tau;
+            }
+
+            const northp = lat > 0;
+            const tau = Math.tan(lat * this.DEG_2_RAD);
+            const secphi = Math.hypot(1, tau);
+            const taup = taupf(tau, es);
+            let rho = Math.hypot(1, taup) + Math.abs(taup);
+            rho = taup >= 0 ? lat !== 90 ? 1/rho : 0 : rho;
+            rho *= 2 * k0 * a / c;
+            const k = lat !== 90 ? (rho / a) * secphi * sqrt(e2m + e2 / (secphi * secphi)) : k0;
+            const x = Math.sin(x * this.DEG_2_RAD) * rho;
+            const y = Math.cos(y * this.DEG_2_RAD) * rho * (northp ? -1 : 1);
+
+            return {
+                northing: y + falseNorthing,
+                easting: x + falseEasting,
+                arctic: northp
+            };
+        },
+
 
         /***************** convert latitude, longitude to USNG  *******************
          Converts lat/lng to USNG coordinates.  Calls LLtoUTM first, then
