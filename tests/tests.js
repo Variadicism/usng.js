@@ -1739,4 +1739,312 @@ describe('Convert Lat/Lon to UTM', function(){
       });
     });
   });
+  describe('UPS conversions', () => {
+    describe('to LL', () => {
+      it('convert north pole', ()=> {
+        const ups = converter.convertToUTMUPS(90, 0)
+        chai.assert.equal("Z 2000000mE 2000000mN", ups)
+      })
+      it('convert just above 84N', ()=> {
+        const ups = converter.convertToUTMUPS(84.01, 0)
+        chai.assert.equal("Z 2000000mE 1334385mN", ups)
+      })
+      it('convert just above 84N with different longitude', ()=> {
+        const ups = converter.convertToUTMUPS(84.01, 15)
+        chai.assert.equal("Z 2172273mE 1357065mN", ups)
+      })
+      it('convert further above 84N', ()=> {
+        const ups = converter.convertToUTMUPS(87, 0)
+        chai.assert.equal("Z 2000000mE 1666855mN", ups)
+      })
+      it('convert further above 84N with different longitude', ()=> {
+        const ups = converter.convertToUTMUPS(87, 15)
+        chai.assert.equal("Z 2086224mE 1678207mN", ups)
+      })
+      it('convert just below 80S', ()=> {
+        const ups = converter.convertToUTMUPS(-80.01, 0)
+        chai.assert.equal("B 2000000mE 3111832mN", ups)
+      })
+      it('convert just below 80S with different longitude', ()=> {
+        const ups = converter.convertToUTMUPS(-80, 15)
+        chai.assert.equal("B 2287763mE 3073947mN", ups)
+      })
+      it('convert further below 80S', ()=> {
+        const ups = converter.convertToUTMUPS(-85, 0)
+        chai.assert.equal("B 2000000mE 2555457mN", ups)
+      })
+      it('convert further below 80S with a different longitude', ()=> {
+        const ups = converter.convertToUTMUPS(-85, 15)
+        chai.assert.equal("B 2143762mE 2536530mN", ups)
+      })
+      describe('test longitude increments of 7.5 degrees', ()=> {
+        it('convert below 80S at 0 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 0)
+          chai.assert.equal("B 2000000mE 2555457mN", ups)
+        })
+        it('convert below 80S at 7.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 7.5)
+          chai.assert.equal("B 2072501mE 2550705mN", ups)
+        })
+        it('convert below 80S at 15 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 15)
+          chai.assert.equal("B 2143762mE 2536530mN", ups)
+        })
+        it('convert below 80S at 22.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 22.5)
+          chai.assert.equal("B 2212564mE 2513175mN", ups)
+        })
+        it('convert below 80S at 30 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 30)
+          chai.assert.equal("B 2277728mE 2481040mN", ups)
+        })
+        it('convert below 80S at 37.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 37.5)
+          chai.assert.equal("B 2338141mE 2440673mN", ups)
+        })
+        it('convert below 80S at 45 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 45)
+          chai.assert.equal("B 2392767mE 2392767mN", ups)
+        })
+        it('convert below 80S at 52.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 52.5)
+          chai.assert.equal("B 2440673mE 2338141mN", ups)
+        })
+        it('convert below 80S at 60 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 60)
+          chai.assert.equal("B 2481040mE 2277728mN", ups)
+        })
+        it('convert below 80S at 67.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 67.5)
+          chai.assert.equal("B 2513175mE 2212564mN", ups)
+        })
+        it('convert below 80S at 75 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 75)
+          chai.assert.equal("B 2536530mE 2143762mN", ups)
+        })
+        it('convert below 80S at 82.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 82.5)
+          chai.assert.equal("B 2550705mE 2072501mN", ups)
+        })
+        it('convert below 80S at 90 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 90)
+          chai.assert.equal("B 2555457mE 2000000mN", ups)
+        })
+        it('convert below 80S at 97.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 97.5)
+          chai.assert.equal("B 2550705mE 1927498mN", ups)
+        })
+        it('convert below 80S at 105 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 105)
+          chai.assert.equal("B 2536530mE 1856237mN", ups)
+        })
+        it('convert below 80S at 112.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 112.5)
+          chai.assert.equal("B 2513175mE 1787435mN", ups)
+        })
+        it('convert below 80S at 120 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 120)
+          chai.assert.equal("B 2481040mE 1722271mN", ups)
+        })
+        it('convert below 80S at 127.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 127.5)
+          chai.assert.equal("B 2440673mE 1661858mN", ups)
+        })
+        it('convert below 80S at 135 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 135)
+          chai.assert.equal("B 2392767mE 1607232mN", ups)
+        })
+        it('convert below 80S at 142.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 142.5)
+          chai.assert.equal("B 2338141mE 1559326mN", ups)
+        })
+        it('convert below 80S at 150 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 150)
+          chai.assert.equal("B 2277728mE 1518959mN", ups)
+        })
+        it('convert below 80S at 157.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 157.5)
+          chai.assert.equal("B 2212564mE 1486824mN", ups)
+        })
+        it('convert below 80S at 165 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 165)
+          chai.assert.equal("B 2143762mE 1463469mN", ups)
+        })
+        it('convert below 80S at 172.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 172.5)
+          chai.assert.equal("B 2072501mE 1449294mN", ups)
+        })
+        it('convert below 80S at 180 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, 180)
+          chai.assert.equal("B 2000000mE 1444542mN", ups)
+        })
+        it('convert below 80S at -7.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -7.5)
+          chai.assert.equal("A 1927498mE 2550705mN", ups)
+        })
+        it('convert below 80S at -15 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -15)
+          chai.assert.equal("A 1856237mE 2536530mN", ups)
+        })
+        it('convert below 80S at -22.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -22.5)
+          chai.assert.equal("A 1787435mE 2513175mN", ups)
+        })
+        it('convert below 80S at -30 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -30)
+          chai.assert.equal("A 1722271mE 2481040mN", ups)
+        })
+        it('convert below 80S at -37.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -37.5)
+          chai.assert.equal("A 1661858mE 2440673mN", ups)
+        })
+        it('convert below 80S at -45 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -45)
+          chai.assert.equal("A 1607232mE 2392767mN", ups)
+        })
+        it('convert below 80S at -52.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -52.5)
+          chai.assert.equal("A 1559326mE 2338141mN", ups)
+        })
+        it('convert below 80S at -60 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -60)
+          chai.assert.equal("A 1518959mE 2277728mN", ups)
+        })
+        it('convert below 80S at -67.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -67.5)
+          chai.assert.equal("A 1486824mE 2212564mN", ups)
+        })
+        it('convert below 80S at -75 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -75)
+          chai.assert.equal("A 1463469mE 2143762mN", ups)
+        })
+        it('convert below 80S at -82.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -82.5)
+          chai.assert.equal("A 1449294mE 2072501mN", ups)
+        })
+        it('convert below 80S at -90 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -90)
+          chai.assert.equal("A 1444542mE 2000000mN", ups)
+        })
+        it('convert below 80S at -97.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -97.5)
+          chai.assert.equal("A 1449294mE 1927498mN", ups)
+        })
+        it('convert below 80S at -105 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -105)
+          chai.assert.equal("A 1463469mE 1856237mN", ups)
+        })
+        it('convert below 80S at -112.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -112.5)
+          chai.assert.equal("A 1486824mE 1787435mN", ups)
+        })
+        it('convert below 80S at -120 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -120)
+          chai.assert.equal("A 1518959mE 1722271mN", ups)
+        })
+        it('convert below 80S at -127.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -127.5)
+          chai.assert.equal("A 1559326mE 1661858mN", ups)
+        })
+        it('convert below 80S at -135 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -135)
+          chai.assert.equal("A 1607232mE 1607232mN", ups)
+        })
+        it('convert below 80S at -142.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -142.5)
+          chai.assert.equal("A 1661858mE 1559326mN", ups)
+        })
+        it('convert below 80S at -150 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -150)
+          chai.assert.equal("A 1722271mE 1518959mN", ups)
+        })
+        it('convert below 80S at -157.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -157.5)
+          chai.assert.equal("A 1787435mE 1486824mN", ups)
+        })
+        it('convert below 80S at -165 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -165)
+          chai.assert.equal("A 1856237mE 1463469mN", ups)
+        })
+        it('convert below 80S at -172.5 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -172.5)
+          chai.assert.equal("A 1927498mE 1449294mN", ups)
+        })
+        it('convert below 80S at -180 latitude', ()=> {
+          const ups = converter.convertToUTMUPS(-85, -180)
+          chai.assert.equal("B 2000000mE 1444542mN", ups)
+        })
+      })
+    });
+    describe('from LL', () => () {
+      const roundFloat= f => Math.round(f * 100) / 100
+      it('convert north pole', ()=> {
+        const longLat = converter.convertFromUTMUPS("Z 2000000mE 2000000mN")
+        chai.assert.equal(90, roundFloat(longLat[0]))
+        chai.assert.equal(0, roundFloat(longLat[1]))
+      })
+      it('convert just above 84N', ()=> {
+        const longLat = converter.convertFromUTMUPS("Z 2000000mE 1334385mN")
+        chai.assert.equal(84.01, roundFloat(longLat[0]))
+        chai.assert.equal(0, roundFloat(longLat[1]))
+      })
+      it('convert just above 84N with different longitude', ()=> {
+        const longLat = converter.convertFromUTMUPS("Z 2172273mE 1357065mN")
+        chai.assert.equal(84.01, roundFloat(longLat[0]))
+        chai.assert.equal(15, roundFloat(longLat[1]))
+      })
+      it('convert further above 84N', ()=> {
+        const longLat = converter.convertFromUTMUPS("Z 2000000mE 1666855mN")
+        chai.assert.equal(87, roundFloat(longLat[0]))
+        chai.assert.equal(0, roundFloat(longLat[1]))
+      })
+      it('convert further above 84N with different longitude', ()=> {
+        const longLat = converter.convertFromUTMUPS("Z 2086224mE 1678207mN")
+        chai.assert.equal(87, roundFloat(longLat[0]))
+        chai.assert.equal(15, roundFloat(longLat[1]))
+      })
+      it('convert just below 80S', ()=> {
+        const longLat = converter.convertFromUTMUPS("B 2000000mE 3111832mN")
+        chai.assert.equal(-80.01, roundFloat(longLat[0]))
+        chai.assert.equal(0, roundFloat(longLat[1]))
+      })
+      it('convert just below 80S with different longitude', ()=> {
+        const longLat = converter.convertFromUTMUPS("B 2287763mE 3073947mN")
+        chai.assert.equal(-80, roundFloat(longLat[0]))
+        chai.assert.equal(15, roundFloat(longLat[1]))
+      })
+      it('convert further below 80S', ()=> {
+        const longLat = converter.convertFromUTMUPS("B 2000000mE 2555457mN")
+        chai.assert.equal(-85, roundFloat(longLat[0]))
+        chai.assert.equal(0, roundFloat(longLat[1]))
+      })
+      it('convert further below 80S with a different longitude', ()=> {
+        const longLat = converter.convertFromUTMUPS("B 2143762mE 2536530mN")
+        chai.assert.equal(-85, roundFloat(longLat[0]))
+        chai.assert.equal(15, roundFloat(longLat[1]))
+      })
+      describe('test four corners in UPS square', ()=> {
+        it('convert Z 2400000mE 2400000mN', ()=>{
+          const longLat = converter.convertFromUTMUPS("Z 2400000mE 2400000mN")
+          chai.assert.equal(84.91, roundFloat(longLat[0]))
+          chai.assert.equal(135, roundFloat(longLat[1]))
+        })
+        it('convert Y 1400000mE 1400000mN', ()=>{
+          const longLat = converter.convertFromUTMUPS("Y 1400000mE 1400000mN")
+          chai.assert.equal(82.37, roundFloat(longLat[0]))
+          chai.assert.equal(-45, roundFloat(longLat[1]))
+        })
+        it('convert Y 1600000mE 2400000mN', ()=>{
+          const longLat = converter.convertFromUTMUPS("Y 1600000mE 2400000mN")
+          chai.assert.equal(84.91, roundFloat(longLat[0]))
+          chai.assert.equal(-135, roundFloat(longLat[1]))
+        })
+        it('convert Z 2400000mE 1600000mN', ()=>{
+          const longLat = converter.convertFromUTMUPS("Z 2400000mE 1600000mN")
+          chai.assert.equal(84.91, roundFloat(longLat[0]))
+          chai.assert.equal(45, roundFloat(longLat[1]))
+        })
+      })
+    })
+  });
 });
