@@ -1739,4 +1739,91 @@ describe('Convert Lat/Lon to UTM', function(){
       });
     });
   });
+  describe('UPS conversions', () => {
+    describe('to LL', () => {
+      it('convert north pole', ()=> {
+        const ups = converter.convertToUTMUPS(90, 0)
+        chai.assert.equal("Z 2000000mE 2000000mN", ups)
+      })
+      it('convert just above 84N', ()=> {
+        const ups = converter.convertToUTMUPS(84.01, 0)
+        chai.assert.equal("Z 2000000mE 1334385mN", ups)
+      })
+      it('convert just above 84N with different longitude', ()=> {
+        const ups = converter.convertToUTMUPS(84.01, 15)
+        chai.assert.equal("Z 2172273mE 1357065mN", ups)
+      })
+      it('convert further above 84N', ()=> {
+        const ups = converter.convertToUTMUPS(87, 0)
+        chai.assert.equal("Z 2000000mE 1666855mN", ups)
+      })
+      it('convert further above 84N with different longitude', ()=> {
+        const ups = converter.convertToUTMUPS(87, 15)
+        chai.assert.equal("Z 2086224mE 1678207mN", ups)
+      })
+      it('convert just below 80S', ()=> {
+        const ups = converter.convertToUTMUPS(-80.01, 0)
+        chai.assert.equal("B 2000000mE 3111832mN", ups)
+      })
+      it('convert just below 80S with different latitude', ()=> {
+        const ups = converter.convertToUTMUPS(-80, 15)
+        chai.assert.equal("B 2287763mE 3073947mN", ups)
+      })
+      it('convert further below 80S', ()=> {
+        const ups = converter.convertToUTMUPS(-85, 0)
+        chai.assert.equal("B 2000000mE 2555457mN", ups)
+      })
+      it('convert further below 80S with a different latitude', ()=> {
+        const ups = converter.convertToUTMUPS(-85, 15)
+        chai.assert.equal("B 2143762mE 2536530mN", ups)
+      })
+    });
+    describe('from LL', () => () {
+      it('convert north pole', ()=> {
+        const longLat = converter.convertFromUTMUPS("Z 2000000mE 2000000mN")
+        chai.assert.equal(90, longLat[0])
+        chai.assert.equal(0, longLat[0])
+      })
+      it('convert just above 84N', ()=> {
+        const longLat = converter.convertFromUTMUPS("Z 2000000mE 1334385mN")
+        chai.assert.equal(84.01, longLat[0])
+        chai.assert.equal(0, longLat[0])
+      })
+      it('convert just above 84N with different longitude', ()=> {
+        const longLat = converter.convertFromUTMUPS("Z 2172273mE 1357065mN")
+        chai.assert.equal(84.01, longLat[0])
+        chai.assert.equal(15, longLat[0])
+      })
+      it('convert further above 84N', ()=> {
+        const longLat = converter.convertFromUTMUPS("Z 2000000mE 1666855mN")
+        chai.assert.equal(87, longLat[0])
+        chai.assert.equal(0, longLat[0])
+      })
+      it('convert further above 84N with different longitude', ()=> {
+        const longLat = converter.convertFromUTMUPS("Z 2086224mE 1678207mN")
+        chai.assert.equal(87, longLat[0])
+        chai.assert.equal(15, longLat[0])
+      })
+      it('convert just below 80S', ()=> {
+        const longLat = converter.convertFromUTMUPS("B 2000000mE 3111832mN")
+        chai.assert.equal(-80.01, longLat[0])
+        chai.assert.equal(0, longLat[0])
+      })
+      it('convert just below 80S with different latitude', ()=> {
+        const longLat = converter.convertFromUTMUPS("B 2287763mE 3073947mN")
+        chai.assert.equal(-80, longLat[0])
+        chai.assert.equal(15, longLat[0])
+      })
+      it('convert further below 80S', ()=> {
+        const longLat = converter.convertFromUTMUPS("B 2000000mE 2555457mN")
+        chai.assert.equal(-85, longLat[0])
+        chai.assert.equal(0, longLat[0])
+      })
+      it('convert further below 80S with a different latitude', ()=> {
+        const longLat = converter.convertFromUTMUPS("B 2143762mE 2536530mN")
+        chai.assert.equal(-85, longLat[0])
+        chai.assert.equal(15, longLat[0])
+      })
+    })
+  });
 });
