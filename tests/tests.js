@@ -1975,6 +1975,20 @@ describe('Convert Lat/Lon to UTM', function(){
           chai.assert.equal("B 2000000mE 1444542mN", ups)
         })
       })
+      describe('convert to UTM when necessary', () => {
+        it('80S', ()=> {
+          const utm = converter.convertToUTMUPS(-80, 0)
+          chai.assert.equal("31C 441867mE 1116915mN", utm)
+        })
+        it('84N', ()=> {
+          const utm = converter.convertToUTMUPS(84, 0)
+          chai.assert.equal("31X 465005mE 9329005mN", utm)
+        })
+        it('0N', ()=> {
+          const utm = converter.convertToUTMUPS(0, 0)
+          chai.assert.equal("31N 166021mE 0mN", utm)
+        })
+      })
     });
     describe('from LL', () => () {
       const roundFloat= f => Math.round(f * 100) / 100
@@ -2043,6 +2057,23 @@ describe('Convert Lat/Lon to UTM', function(){
           const longLat = converter.convertFromUTMUPS("Z 2400000mE 1600000mN")
           chai.assert.equal(84.91, roundFloat(longLat[0]))
           chai.assert.equal(45, roundFloat(longLat[1]))
+        })
+      })
+      describe('convert from UTM when necessary', () => {
+        it('80S', ()=> {
+          const longLat = converter.convertFromUTMUPS("31C 441867mE 1116915mN")
+          chai.assert.equal(80, roundFloat(longLat[0]))
+          chai.assert.equal(0, roundFloat(longLat[1]))
+        })
+        it('84N', ()=> {
+          const longLat = converter.convertFromUTMUPS("31X 465005mE 9329005m")
+          chai.assert.equal(84, roundFloat(longLat[0]))
+          chai.assert.equal(0, roundFloat(longLat[1]))
+        })
+        it('0N', ()=> {
+          const longLat = converter.convertFromUTMUPS("31N 166021mE 0m")
+          chai.assert.equal(0, roundFloat(longLat[0]))
+          chai.assert.equal(0, roundFloat(longLat[1]))
         })
       })
     })
