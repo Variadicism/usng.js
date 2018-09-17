@@ -265,6 +265,19 @@
             return result;
         },
 
+        serializeUTM({zoneNumber, easting, northing}) {
+            return `${zoneNumber} ${easting}mE ${northing}mN` 
+        },
+
+        deserializeUTM(str) {
+            const [zoneNumber, easting, northing] = str.split(" ")
+            return {
+                zoneNumber: Number(zoneNumber),
+                easting: Number(easting.slice(0, -2)),
+                northing: Number(northing.slice(0, -2))
+            }
+        },
+
         /***************** convert latitude, longitude to UTM  *******************
 
          Converts lat/long to UTM coords.  Equations from USGS Bulletin 1532
@@ -343,7 +356,7 @@
             return {
                 easting: UTMEasting,
                 northing: UTMNorthing,
-                zone: zoneNumber
+                zoneNumber: zoneNumber
             };
         },
 
@@ -381,9 +394,9 @@
         },
            
         deserializeUPS(str) {
-            const [zone, easting, northing] = str.split(" ")
+            const [zoneLetter, easting, northing] = str.split(" ")
             return {
-                northPole: (["Y", "Z"].includes(zone)) ? true : false,
+                northPole: (["Y", "Z"].includes(zoneLetter)) ? true : false,
                 easting: Number(easting.slice(0, -2)),
                 northing: Number(northing.slice(0, -2))
             }
@@ -440,9 +453,12 @@
         },
 
         convertFromUTMUPS(str) {
-            const [zone, easting, northing] = str.split(" ")
-            return (["A","B","Y","Z"].includes(zone)) ? UPStoLL(deserializeUPS(str)) 
-                : UTMtoLL(Number(easting.slice(0,-2)), Number(northing.slice(0,-2)), Number(zone.slice(0,-1)))
+            const [zone] = str.split(" ")
+            if(["A","B","Y","Z"].includes(zone)) { return UPStoLL(deserializeUPS(str)) }
+            else {
+                const {zoneNumber, easting, northing} = deserializeUTM(str)
+                return UTMtoLL(easting, northing, zoneNumber)
+            }
         },
         
         convertToUTMUPS(lat, lon) {
@@ -451,7 +467,7 @@
                 throw new Error(`usng.js, LLtoUTMUPS, invalid input. lat: ${lat.toFixed(4)} lon: ${lon.toFixed(4)}`);
             }
              // Constrain reporting UTM coords to the latitude range [80S .. 84N]
-            return (lat > 84.0 || lat < -80.0) ? LLtoUPS(lat, lon) : LLtoUTM(lat, lon)
+            return (lat > 84.0 || lat < -80.0) ? serializeUPS(LLtoUPS(lat, lon)) : serializeUTM(LLtoUTM(lat, lon))
         },
 
         /***************** convert latitude, longitude to USNG  *******************
