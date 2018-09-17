@@ -442,7 +442,7 @@
         convertFromUTMUPS(str) {
             const [zone, easting, northing] = str.split(" ")
             return (["A","B","Y","Z"].includes(zone)) ? UPStoLL(deserializeUPS(str)) 
-                : UTMtoLL(Number(easting.slice(0,-2)), Number(northing.slice(0,-2)), Number(zone.slice(0,-2)))
+                : UTMtoLL(Number(easting.slice(0,-2)), Number(northing.slice(0,-2)), Number(zone.slice(0,-1)))
         },
         
         convertToUTMUPS(lat, lon) {
