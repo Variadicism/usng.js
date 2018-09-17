@@ -382,14 +382,16 @@
             return result;
         },
 
-        serializeUPS({northp, easting, northing}) {
-            return `${northp ? 'Z' : 'B'} ${easting}mE ${northing}mN` 
+        serializeUPS({northPole, easting, northing}) {
+            const zoneLetter = northPole ? (easting < 2000000 ? 'Y' : 'Z') 
+                : (easting < 2000000 ? 'A' : 'B')
+            return `${zoneLetter} ${easting}mE ${northing}mN` 
         },
            
         deserializeUPS(str) {
             const [zone, easting, northing] = str.split(" ")
             return {
-                northp: zone === "Z" ? true : false,
+                northPole: (zone === "Y" || zone === "Z") ? true : false,
                 easting: Number(easting.slice(0, -2)),
                 northing: Number(northing.slice(0, -2))
             }
@@ -427,7 +429,7 @@
               return Math.hypot(1, sig) * tau - sig * tau1;
             }
 
-            const northp = lat > 0;
+            const northPole = lat > 0;
             const tau = Math.tan(lat * this.DEG_2_RAD);
             const secphi = Math.hypot(1, tau);
             const taup = taupf(tau, es);
@@ -441,7 +443,7 @@
             return {
                 northing: y + falseNorthing,
                 easting: x + falseEasting,
-                arctic: northp
+                northPole
             };
         },
 
