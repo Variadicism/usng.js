@@ -281,26 +281,12 @@
          utmcoords[2] = zone
 
          ***************************************************************************/
-        LLtoUTM: function (lat,lon,utmcoords,zone) {
+        LLtoUTM: function (lat,lon,utmcoords = [],zone) {
             // utmcoords is a 2-D array declared by the calling routine
             // note: input of lon = 180 or -180 with zone 60 not allowed; use 179.9999
 
             lat = parseFloat(lat);
             lon = parseFloat(lon);
-
-        // Constrain reporting USNG coords to the latitude range [80S .. 84N]
-        /////////////////
-            if (lat > 84.0 || lat < -80.0){
-                return this.UNDEFINED_STR;
-            }
-        //////////////////////
-
-
-            // sanity check on input - turned off when testing with Generic Viewer
-            if (lon > 360 || lon < -180 || lat > 90 || lat < -90) {
-                throw new Error('usng.js, LLtoUTM, invalid input. lat: ' + lat.toFixed(4) + ' lon: ' + lon.toFixed(4));
-            }
-
 
             // Make sure the longitude is between -180.00 .. 179.99..
             // Convert values on 0-360 range to this range.
@@ -353,6 +339,12 @@
             utmcoords[0] = UTMEasting;
             utmcoords[1] = UTMNorthing;
             utmcoords[2] = zoneNumber;
+
+            return {
+                easting: UTMEasting,
+                northing: UTMNorthing,
+                zone: zoneNumber
+            };
         },
 
         /***************** convert latitude, longitude to UTM  *******************
@@ -391,20 +383,20 @@
         deserializeUPS(str) {
             const [zone, easting, northing] = str.split(" ")
             return {
-                northPole: (zone === "Y" || zone === "Z") ? true : false,
+                northPole: (["Y", "Z"].includes(zone)) ? true : false,
                 easting: Number(easting.slice(0, -2)),
                 northing: Number(northing.slice(0, -2))
             }
         },
 
         /***************** convert latitude, longitude to UPS  *******************
-        Uses "arctic" boolean instead of returning a negative Northing value
+        Uses "northPole" boolean instead of returning a negative Northing value
 
         Input latitide is expected to be [-90, 90].
         Input longitude is expected to be [-180, 180].
 
         This returns an object describing the UPS coordinates:
-        { northing: number, easting: number, arctic: bool }
+        { northing: number, easting: number, northPole: bool }
         ***************************************************************************/
         LLtoUPS: function(lat, lon) {
             const a = 6378137;
@@ -447,6 +439,20 @@
             };
         },
 
+        convertFromUTMUPS(str) {
+            const [zone, easting, northing] = str.split(" ")
+            return (["A","B","Y","Z"].includes(zone)) ? UPStoLL(deserializeUPS(str)) 
+                : UTMtoLL(Number(easting.slice(0,-2)), Number(northing.slice(0,-2)), Number(zone.slice(0,-2)))
+        },
+        
+        convertToUTMUPS(lat, lon) {
+            // sanity check on input - turned off when testing with Generic Viewer
+            if (lon > 360 || lon < -180 || lat > 90 || lat < -90) {
+                throw new Error(`usng.js, LLtoUTMUPS, invalid input. lat: ${lat.toFixed(4)} lon: ${lon.toFixed(4)}`);
+            }
+             // Constrain reporting UTM coords to the latitude range [80S .. 84N]
+            return (lat > 84.0 || lat < -80.0) ? LLtoUPS(lat, lon) : LLtoUTM(lat, lon)
+        },
 
         /***************** convert latitude, longitude to USNG  *******************
          Converts lat/lng to USNG coordinates.  Calls LLtoUTM first, then
