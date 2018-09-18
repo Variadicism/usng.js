@@ -1816,7 +1816,7 @@ describe('Convert Lat/Lon to UTM', function(){
         chai.assert.equal("B 2000000mE 3111832mN", ups)
       })
       it('convert just below 80S with different longitude', ()=> {
-        const ups = converter.convertToUTMUPS(-80, 15)
+        const ups = converter.convertToUTMUPS(-80.01, 15)
         chai.assert.equal("B 2287763mE 3073947mN", ups)
       })
       it('convert further below 80S', ()=> {
