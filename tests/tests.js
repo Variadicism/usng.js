@@ -801,6 +801,56 @@ describe('Convert Lat/Lon to USNG', function(){
     });
   });
 });
+describe('Convert Lat/Lon to UPS', function(){
+  describe('at the north pole', function(){
+    it('should return easting=2000000; northing=2000000; northPole=true', function(){
+      const ups = converter.LLtoUPS(90, 0);
+      chai.assert.equal(ups.northing, 2000000);
+      chai.assert.equal(ups.easting, 2000000);
+      chai.assert.equal(true, ups.northPole);
+    });
+  });
+  describe('at the south pole', function(){
+    it('should return easting=2000000; northing=2000000; northPole=false', function(){
+      const ups = converter.LLtoUPS(-90, 0);
+      chai.assert.equal(ups.northing, 2000000);
+      chai.assert.equal(ups.easting, 2000000);
+      chai.assert.equal(false, ups.northPole);
+    });
+  });
+  describe('at -87 lat, 0 lon', function(){
+    it('should return easting=2000000; northing=2333144; northPole=false', function(){
+      const ups = converter.LLtoUPS(-87, 0);
+      chai.expect(ups.northing).to.be.within(2333142, 2333146);
+      chai.expect(ups.easting).to.be.within(1999998, 2000002);
+      chai.assert.equal(false, ups.northPole);
+    });
+  });
+  describe('at 87 lat, 67 lon', function(){
+    it('should return easting=2306661; northing=1869830; northPole=true', function(){
+      const ups = converter.LLtoUPS(87, 67);
+      chai.expect(ups.northing).to.be.within(1869828, 1869832);
+      chai.expect(ups.easting).to.be.within(2306659, 2306663);
+      chai.assert.equal(true, ups.northPole);
+    });
+  });
+  describe('at 87 lat, -67 lon', function(){
+    it('should return easting=1693338; northing=1869830; northPole=true', function(){
+      const ups = converter.LLtoUPS(87, -67);
+      chai.expect(ups.northing).to.be.within(1869828, 1869832);
+      chai.expect(ups.easting).to.be.within(1693336, 1693340);
+      chai.assert.equal(true, ups.northPole);
+    });
+  });
+  describe('at 84.1 lat, -166 lon', function(){
+    it('should return easting=1841396; northing=2636122; northPole=true', function(){
+      const ups = converter.LLtoUPS(84.1, -166);
+      chai.expect(ups.northing).to.be.within(2636120, 2636124);
+      chai.expect(ups.easting).to.be.within(1841394, 1841398);
+      chai.assert.equal(true, ups.northPole);
+    });
+  });
+});
 describe('Convert Lat/Lon to UTM', function(){
   describe('around Arizona in the United States', function(){
     it('should return easting=500000; northing=3762155; zone=12', function(){

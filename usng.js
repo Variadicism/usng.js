@@ -413,42 +413,37 @@
         ***************************************************************************/
         LLtoUPS: function(lat, lon) {
             const a = 6378137;
-            const f = 1/298.257223563;
-            const k0 = 0.9996;
+            const f = 0.00335281;
+            const k0 = 0.994;
             const e2 = f * (2 - f);
             const es = (f < 0 ? -1 : 1) * Math.sqrt(Math.abs(e2));
-            const e2m = 1 - e2;
+            const c = 1.00336;
 
             const falseNorthing = 2000000;
             const falseEasting = 2000000;
 
-            const eatanhe = function(tau, es) {
-              return es > 0 ? es * Math.atanh(es * x) : -es * Math.atan(es * x);
-            }
+            const eatanhe = x => es * Math.atanh(es * x);
 
-            const c = (1 - f) * Math.log(eatanhe(1, es));
-
-            const taupf = function(tau, es) {
+            const taupf = tau => {
               const tau1 = Math.hypot(1, tau);
-              const sig = Math.sinh(eatanhe(tau / tau1, es));
+              const sig = Math.sinh(eatanhe(tau / tau1));
               return Math.hypot(1, sig) * tau - sig * tau1;
             }
 
-            const northPole = lat > 0;
-            const tau = Math.tan(lat * this.DEG_2_RAD);
+            const northp = lat > 0;
+            const tau = Math.tan(Math.abs(lat) * this.DEG_2_RAD);
             const secphi = Math.hypot(1, tau);
             const taup = taupf(tau, es);
             let rho = Math.hypot(1, taup) + Math.abs(taup);
-            rho = taup >= 0 ? lat !== 90 ? 1/rho : 0 : rho;
+            rho = taup >= 0 ? (Math.abs(lat) !== 90 ? 1/rho : 0) : rho;
             rho *= 2 * k0 * a / c;
-            const k = lat !== 90 ? (rho / a) * secphi * sqrt(e2m + e2 / (secphi * secphi)) : k0;
             const x = Math.sin(lon * this.DEG_2_RAD) * rho;
-            const y = Math.cos(lon * this.DEG_2_RAD) * rho * (northp ? -1 : 1);
+            const y = Math.cos(lon * this.DEG_2_RAD) * (northp ? -rho : rho);
 
             return {
-                northing: y + falseNorthing,
-                easting: x + falseEasting,
-                northPole
+                northing: Math.round(y + falseNorthing),
+                easting: Math.round(x + falseEasting),
+                northPole: northp
             };
         },
 
