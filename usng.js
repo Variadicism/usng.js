@@ -441,8 +441,8 @@
             const y = Math.cos(lon * this.DEG_2_RAD) * (northp ? -rho : rho);
 
             return {
-                northing: Math.round(y + falseNorthing),
-                easting: Math.round(x + falseEasting),
+                northing: y + falseNorthing,
+                easting: x + falseEasting,
                 northPole: northp
             };
         },
