@@ -801,54 +801,582 @@ describe('Convert Lat/Lon to USNG', function(){
     });
   });
 });
-describe('Convert Lat/Lon to UPS', function(){
-  describe('at the north pole', function(){
-    it('should return easting=2000000; northing=2000000; northPole=true', function(){
+describe('UPS Conversions', () => {
+  describe('LLtoUPS', () => {
+    const range = 3.5
+    it('north pole', () => {
       const ups = converter.LLtoUPS(90, 0);
       chai.assert.equal(ups.northing, 2000000);
       chai.assert.equal(ups.easting, 2000000);
-      chai.assert.equal(true, ups.northPole);
+      chai.assert.equal(ups.northPole, true);
     });
-  });
-  describe('at the south pole', function(){
-    it('should return easting=2000000; northing=2000000; northPole=false', function(){
+    it('convert just above 84N', () => {
+      const ups = converter.LLtoUPS(84.01, 0);
+      chai.expect(ups.easting).to.be.closeTo(2000000, range);
+      chai.expect(ups.northing).to.be.closeTo(1334385, range);
+      chai.assert.equal(ups.northPole, true);
+    });
+    it('convert just above 84N with different longitude', ()=> {
+      const ups = converter.LLtoUPS(84.01, 15)
+      chai.expect(ups.easting).to.be.closeTo(2172273, range);
+      chai.expect(ups.northing).to.be.closeTo(1357065, range);
+      chai.assert.equal(ups.northPole, true);
+    })
+    it('convert further above 84N', ()=> {
+      const ups = converter.LLtoUPS(87, 0)
+      chai.expect(ups.easting).to.be.closeTo(2000000, range);
+      chai.expect(ups.northing).to.be.closeTo(1666855, range);
+      chai.assert.equal(ups.northPole, true);
+    })
+    it('convert further above 84N with different longitude', ()=> {
+      const ups = converter.LLtoUPS(87, 15)
+      chai.expect(ups.easting).to.be.closeTo(2086224, range);
+      chai.expect(ups.northing).to.be.closeTo(1678207, range);
+      chai.assert.equal(ups.northPole, true);
+    })
+    it('convert just below 80S', ()=> {
+      const ups = converter.LLtoUPS(-80.01, 0)
+      chai.expect(ups.easting).to.be.closeTo(2000000, range);
+      chai.expect(ups.northing).to.be.closeTo(3111832, range);
+      chai.assert.equal(ups.northPole, false);
+    })
+    it('convert just below 80S with different longitude', ()=> {
+      const ups = converter.LLtoUPS(-80.01, 15)
+      chai.expect(ups.easting).to.be.closeTo(2287763, range);
+      chai.expect(ups.northing).to.be.closeTo(3073947, range);
+      chai.assert.equal(ups.northPole, false);
+    })
+    it('convert further below 80S', ()=> {
+      const ups = converter.LLtoUPS(-85, 0)
+      chai.expect(ups.easting).to.be.closeTo(2000000, range);
+      chai.expect(ups.northing).to.be.closeTo(2555457, range);
+      chai.assert.equal(ups.northPole, false);
+    })
+    it('convert further below 80S with a different longitude', ()=> {
+      const ups = converter.LLtoUPS(-85, 15)
+      chai.expect(ups.easting).to.be.closeTo(2143762, range);
+      chai.expect(ups.northing).to.be.closeTo(2536530, range);
+      chai.assert.equal(ups.northPole, false);
+    })
+    it('at the south pole', () => {
       const ups = converter.LLtoUPS(-90, 0);
       chai.assert.equal(ups.northing, 2000000);
       chai.assert.equal(ups.easting, 2000000);
-      chai.assert.equal(false, ups.northPole);
+      chai.assert.equal(ups.northPole, false);
     });
-  });
-  describe('at -87 lat, 0 lon', function(){
-    it('should return easting=2000000; northing=2333144; northPole=false', function(){
+    it('at -87 lat, 0 lon', () => {
       const ups = converter.LLtoUPS(-87, 0);
       chai.expect(ups.northing).to.be.within(2333142, 2333146);
       chai.expect(ups.easting).to.be.within(1999998, 2000002);
-      chai.assert.equal(false, ups.northPole);
+      chai.assert.equal(ups.northPole, false);
     });
-  });
-  describe('at 87 lat, 67 lon', function(){
-    it('should return easting=2306661; northing=1869830; northPole=true', function(){
+    it('at 87 lat, 67 lon', () => {
       const ups = converter.LLtoUPS(87, 67);
       chai.expect(ups.northing).to.be.within(1869828, 1869832);
       chai.expect(ups.easting).to.be.within(2306659, 2306663);
-      chai.assert.equal(true, ups.northPole);
+      chai.assert.equal(ups.northPole, true);
     });
-  });
-  describe('at 87 lat, -67 lon', function(){
-    it('should return easting=1693338; northing=1869830; northPole=true', function(){
+    it('at 87 lat, -67 lon', () => {
       const ups = converter.LLtoUPS(87, -67);
       chai.expect(ups.northing).to.be.within(1869828, 1869832);
       chai.expect(ups.easting).to.be.within(1693336, 1693340);
-      chai.assert.equal(true, ups.northPole);
+      chai.assert.equal(ups.northPole, true);
     });
-  });
-  describe('at 84.1 lat, -166 lon', function(){
-    it('should return easting=1841396; northing=2636122; northPole=true', function(){
+    it('at 84.1 lat, -166 lon', () => {
       const ups = converter.LLtoUPS(84.1, -166);
       chai.expect(ups.northing).to.be.within(2636120, 2636124);
       chai.expect(ups.easting).to.be.within(1841394, 1841398);
-      chai.assert.equal(true, ups.northPole);
+      chai.assert.equal(ups.northPole, true);
     });
+    describe('test longitude increments of 7.5 degrees', ()=> {
+      it('convert below 80S at 0 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 0)
+        chai.expect(ups.easting).to.be.closeTo(2000000, range);
+        chai.expect(ups.northing).to.be.closeTo(2555457, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 7.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 7.5)
+        chai.expect(ups.easting).to.be.closeTo(2072501, range);
+        chai.expect(ups.northing).to.be.closeTo(2550705, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 15 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 15)
+        chai.expect(ups.easting).to.be.closeTo(2143762, range);
+        chai.expect(ups.northing).to.be.closeTo(2536530, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 22.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 22.5)
+        chai.expect(ups.easting).to.be.closeTo(2212564, range);
+        chai.expect(ups.northing).to.be.closeTo(2513175, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 30 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 30)
+        chai.expect(ups.easting).to.be.closeTo(2277728, range);
+        chai.expect(ups.northing).to.be.closeTo(2481040, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 37.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 37.5)
+        chai.expect(ups.easting).to.be.closeTo(2338141, range);
+        chai.expect(ups.northing).to.be.closeTo(2440673, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 45 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 45)
+        chai.expect(ups.easting).to.be.closeTo(2392767, range);
+        chai.expect(ups.northing).to.be.closeTo(2392767, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 52.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 52.5)
+        chai.expect(ups.easting).to.be.closeTo(2440673, range);
+        chai.expect(ups.northing).to.be.closeTo(2338141, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 60 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 60)
+        chai.expect(ups.easting).to.be.closeTo(2481040, range);
+        chai.expect(ups.northing).to.be.closeTo(2277728, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 67.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 67.5)
+        chai.expect(ups.easting).to.be.closeTo(2513175, range);
+        chai.expect(ups.northing).to.be.closeTo(2212564, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 75 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 75)
+        chai.expect(ups.easting).to.be.closeTo(2536530, range);
+        chai.expect(ups.northing).to.be.closeTo(2143762, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 82.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 82.5)
+        chai.expect(ups.easting).to.be.closeTo(2550705, range);
+        chai.expect(ups.northing).to.be.closeTo(2072501, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 90 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 90)
+        chai.expect(ups.easting).to.be.closeTo(2555457, range);
+        chai.expect(ups.northing).to.be.closeTo(2000000, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 97.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 97.5)
+        chai.expect(ups.easting).to.be.closeTo(2550705, range);
+        chai.expect(ups.northing).to.be.closeTo(1927498, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 105 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 105)
+        chai.expect(ups.easting).to.be.closeTo(2536530, range);
+        chai.expect(ups.northing).to.be.closeTo(1856237, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 112.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 112.5)
+        chai.expect(ups.easting).to.be.closeTo(2513175, range);
+        chai.expect(ups.northing).to.be.closeTo(1787435, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 120 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 120)
+        chai.expect(ups.easting).to.be.closeTo(2481040, range);
+        chai.expect(ups.northing).to.be.closeTo(1722271, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 127.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 127.5)
+        chai.expect(ups.easting).to.be.closeTo(2440673, range);
+        chai.expect(ups.northing).to.be.closeTo(1661858, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 135 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 135)
+        chai.expect(ups.easting).to.be.closeTo(2392767, range);
+        chai.expect(ups.northing).to.be.closeTo(1607232, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 142.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 142.5)
+        chai.expect(ups.easting).to.be.closeTo(2338141, range);
+        chai.expect(ups.northing).to.be.closeTo(1559326, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 150 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 150)
+        chai.expect(ups.easting).to.be.closeTo(2277728, range);
+        chai.expect(ups.northing).to.be.closeTo(1518959, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 157.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 157.5)
+        chai.expect(ups.easting).to.be.closeTo(2212564, range);
+        chai.expect(ups.northing).to.be.closeTo(1486824, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 165 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 165)
+        chai.expect(ups.easting).to.be.closeTo(2143762, range);
+        chai.expect(ups.northing).to.be.closeTo(1463469, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 172.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 172.5)
+        chai.expect(ups.easting).to.be.closeTo(2072501, range);
+        chai.expect(ups.northing).to.be.closeTo(1449294, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at 180 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, 180)
+        chai.expect(ups.easting).to.be.closeTo(2000000, range);
+        chai.expect(ups.northing).to.be.closeTo(1444542, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -7.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -7.5)
+        chai.expect(ups.easting).to.be.closeTo(1927498, range);
+        chai.expect(ups.northing).to.be.closeTo(2550705, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -15 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -15)
+        chai.expect(ups.easting).to.be.closeTo(1856237, range);
+        chai.expect(ups.northing).to.be.closeTo(2536530, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -22.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -22.5)
+        chai.expect(ups.easting).to.be.closeTo(1787435, range);
+        chai.expect(ups.northing).to.be.closeTo(2513175, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -30 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -30)
+        chai.expect(ups.easting).to.be.closeTo(1722271, range);
+        chai.expect(ups.northing).to.be.closeTo(2481040, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -37.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -37.5)
+        chai.expect(ups.easting).to.be.closeTo(1661858, range);
+        chai.expect(ups.northing).to.be.closeTo(2440673, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -45 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -45)
+        chai.expect(ups.easting).to.be.closeTo(1607232, range);
+        chai.expect(ups.northing).to.be.closeTo(2392767, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -52.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -52.5)
+        chai.expect(ups.easting).to.be.closeTo(1559326, range);
+        chai.expect(ups.northing).to.be.closeTo(2338141, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -60 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -60)
+        chai.expect(ups.easting).to.be.closeTo(1518959, range);
+        chai.expect(ups.northing).to.be.closeTo(2277728, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -67.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -67.5)
+        chai.expect(ups.easting).to.be.closeTo(1486824, range);
+        chai.expect(ups.northing).to.be.closeTo(2212564, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -75 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -75)
+        chai.expect(ups.easting).to.be.closeTo(1463469, range);
+        chai.expect(ups.northing).to.be.closeTo(2143762, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -82.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -82.5)
+        chai.expect(ups.easting).to.be.closeTo(1449294, range);
+        chai.expect(ups.northing).to.be.closeTo(2072501, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -90 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -90)
+        chai.expect(ups.easting).to.be.closeTo(1444542, range);
+        chai.expect(ups.northing).to.be.closeTo(2000000, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -97.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -97.5)
+        chai.expect(ups.easting).to.be.closeTo(1449294, range);
+        chai.expect(ups.northing).to.be.closeTo(1927498, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -105 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -105)
+        chai.expect(ups.easting).to.be.closeTo(1463469, range);
+        chai.expect(ups.northing).to.be.closeTo(1856237, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -112.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -112.5)
+        chai.expect(ups.easting).to.be.closeTo(1486824, range);
+        chai.expect(ups.northing).to.be.closeTo(1787435, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -120 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -120)
+        chai.expect(ups.easting).to.be.closeTo(1518959, range);
+        chai.expect(ups.northing).to.be.closeTo(1722271, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -127.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -127.5)
+        chai.expect(ups.easting).to.be.closeTo(1559326, range);
+        chai.expect(ups.northing).to.be.closeTo(1661858, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -135 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -135)
+        chai.expect(ups.easting).to.be.closeTo(1607232, range);
+        chai.expect(ups.northing).to.be.closeTo(1607232, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -142.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -142.5)
+        chai.expect(ups.easting).to.be.closeTo(1661858, range);
+        chai.expect(ups.northing).to.be.closeTo(1559326, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -150 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -150)
+        chai.expect(ups.easting).to.be.closeTo(1722271, range);
+        chai.expect(ups.northing).to.be.closeTo(1518959, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -157.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -157.5)
+        chai.expect(ups.easting).to.be.closeTo(1787435, range);
+        chai.expect(ups.northing).to.be.closeTo(1486824, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -165 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -165)
+        chai.expect(ups.easting).to.be.closeTo(1856237, range);
+        chai.expect(ups.northing).to.be.closeTo(1463469, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -172.5 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -172.5)
+        chai.expect(ups.easting).to.be.closeTo(1927498, range);
+        chai.expect(ups.northing).to.be.closeTo(1449294, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+      it('convert below 80S at -180 latitude', ()=> {
+        const ups = converter.LLtoUPS(-85, -180)
+        chai.expect(ups.easting).to.be.closeTo(2000000, range);
+        chai.expect(ups.northing).to.be.closeTo(1444542, range);
+        chai.assert.equal(ups.northPole, false);
+      })
+    })
+  })
+  describe('UPStoLL', () => {
+    const range = 0.5
+    it('convert north pole', ()=> {
+      const longLat = converter.UPStoLL({
+        northing: 2000000,
+        easting: 2000000,
+        northPole: true
+      });
+      chai.expect(longLat[0]).to.be.closeTo(90, range)
+      chai.expect(longLat[1]).to.be.closeTo(0, range)
+    })
+    it('convert just above 84N', ()=> {
+      const longLat = converter.UPStoLL({
+        northing: 1334385,
+        easting: 2000000,
+        northPole: true
+      });
+      chai.expect(longLat[0]).to.be.closeTo(84.01, range)
+      chai.expect(longLat[1]).to.be.closeTo(0, range)
+    })
+    it('convert just above 84N with different longitude', ()=> {
+      const longLat = converter.UPStoLL({
+        northing: 1357065,
+        easting: 2172273,
+        northPole: true
+      });
+      chai.expect(longLat[0]).to.be.closeTo(84.01, range)
+      chai.expect(longLat[1]).to.be.closeTo(15, range)
+    })
+    it('convert further above 84N', ()=> {
+      const longLat = converter.UPStoLL({
+        northing: 1666855,
+        easting: 2000000,
+        northPole: true
+      });
+      chai.expect(longLat[0]).to.be.closeTo(87, range)
+      chai.expect(longLat[1]).to.be.closeTo(0, range)
+    })
+    it('convert further above 84N with different longitude', ()=> {
+      const longLat = converter.UPStoLL({
+        northing: 1678207,
+        easting: 2086224,
+        northPole: true
+      });
+      chai.expect(longLat[0]).to.be.closeTo(87, range)
+      chai.expect(longLat[1]).to.be.closeTo(15, range)
+    })
+    it('convert just below 80S', ()=> {
+      const longLat = converter.UPStoLL({
+        northing: 3111832,
+        easting: 2000000,
+        northPole: true
+      });
+      chai.expect(longLat[0]).to.be.closeTo(-80.01, range)
+      chai.expect(longLat[1]).to.be.closeTo(0, range)
+    })
+    it('convert just below 80S with different longitude', ()=> {
+      const longLat = converter.UPStoLL({
+        northing: 3073947,
+        easting: 2287763,
+        northPole: true
+      });
+      chai.expect(longLat[0]).to.be.closeTo(-80, range)
+      chai.expect(longLat[1]).to.be.closeTo(15, range)
+    })
+    it('convert further below 80S', ()=> {
+      const longLat = converter.UPStoLL({
+        northing: 2555457,
+        easting: 2000000,
+        northPole: true
+      });
+      chai.expect(longLat[0]).to.be.closeTo(-85, range)
+      chai.expect(longLat[1]).to.be.closeTo(0, range)
+    })
+    it('convert further below 80S with a different longitude', ()=> {
+      const longLat = converter.UPStoLL({
+        northing: 2536530,
+        easting: 2143762,
+        northPole: true
+      });
+      chai.expect(longLat[0]).to.be.closeTo(-85, range)
+      chai.expect(longLat[1]).to.be.closeTo(15, range)
+    })
+    describe('test four corners in UPS square', ()=> {
+      it('convert Z 2400000mE 2400000mN', ()=>{
+        const longLat = converter.UPStoLL({
+          northing: 2400000,
+          easting: 2400000,
+          northPole: true
+        });
+        chai.expect(longLat[0]).to.be.closeTo(84.91, range)
+        chai.expect(longLat[1]).to.be.closeTo(135, range)
+      })
+      it('convert Y 1400000mE 1400000mN', ()=>{
+        const longLat = converter.UPStoLL({
+          northing: 1400000,
+          easting: 1400000,
+          northPole: true
+        });
+        chai.expect(longLat[0]).to.be.closeTo(82.37, range)
+        chai.expect(longLat[1]).to.be.closeTo(-45, range)
+      })
+      it('convert Y 1600000mE 2400000mN', ()=>{
+        const longLat = converter.UPStoLL({
+          northing: 2400000,
+          easting: 1600000,
+          northPole: true
+        });
+        chai.expect(longLat[0]).to.be.closeTo(84.91, range)
+        chai.expect(longLat[1]).to.be.closeTo(-135, range)
+      })
+      it('convert Z 2400000mE 1600000mN', ()=>{
+        const longLat = converter.UPStoLL({
+          northing: 1600000,
+          easting: 2400000,
+          northPole: true
+        });
+        chai.expect(longLat[0]).to.be.closeTo(84.91, range)
+        chai.expect(longLat[1]).to.be.closeTo(45, range)
+      })
+    })
+  })
+  describe('convertToUTMUPS', () => {
+    describe('convert to UTM when necessary', () => {
+      it('80S', ()=> {
+        const utm = converter.convertToUTMUPS(-80, 0)
+        const expected = "31 441"
+        chai.expect(utm.substr(0, expected.length)).to.equal(expected)
+      })
+      it('84N', ()=> {
+        const utm = converter.convertToUTMUPS(84, 0)
+        const expected = "31 465"
+        chai.expect(utm.substr(0, expected.length)).to.equal(expected)
+      })
+      it('0N', ()=> {
+        const utm = converter.convertToUTMUPS(0, 0)
+        const expected = "31 166"
+        chai.expect(utm.substr(0, expected.length)).to.equal(expected)
+      })
+    })
+  });
+  describe('convertFromUTMUPS', () => {
+    describe('convert from UTM when necessary', () => {
+      const range = 0.5
+      it('80S', ()=> {
+        const longLat = converter.convertFromUTMUPS("31C 441867mE 1116915mN")
+        chai.expect(longLat[0]).to.be.closeTo(80, range)
+        chai.expect(longLat[1]).to.be.closeTo(0, range)
+      })
+      it('84N', ()=> {
+        const longLat = converter.convertFromUTMUPS("31X 465005mE 9329005m")
+        chai.expect(longLat[0]).to.be.closeTo(84, range)
+        chai.expect(longLat[1]).to.be.closeTo(0, range)
+      })
+      it('0N', ()=> {
+        const longLat = converter.convertFromUTMUPS("31N 166021mE 0m")
+        chai.expect(longLat[0]).to.be.closeTo(0, range)
+        chai.expect(longLat[1]).to.be.closeTo(0, range)
+      })
+    })
+  })
+  describe('deserializeUPS', () => {
+    it('north', () => {
+      const ups = converter.deserializeUPS("Z 2445183mE 2313228mN")
+      chai.assert.equal(ups.northPole, true);
+      chai.assert.equal(ups.northing, 2313228);
+      chai.assert.equal(ups.easting, 2445183);
+    })
+    it('south', () => {
+      const ups = converter.deserializeUPS("A 1554816mE 1686771mN")
+      chai.assert.equal(ups.northPole, false);
+      chai.assert.equal(ups.northing, 1686771);
+      chai.assert.equal(ups.easting, 1554816);
+    })
+  });
+  describe('serializeUPS', () => {
+    it('north', () => {
+      const ups = converter.serializeUPS({
+        northPole: true,
+        northing: 2313228,
+        easting: 2445183,
+      })
+      chai.expect(ups).to.contain("2445183mE 2313228mN")
+    })
+    it('south', () => {
+      const ups = converter.serializeUPS({
+        northPole: false,
+        northing: 1686771,
+        easting: 1554816,
+      })
+      chai.expect(ups).to.contain("1554816mE 1686771mN")
+    })
   });
 });
 describe('Convert Lat/Lon to UTM', function(){
@@ -1788,344 +2316,5 @@ describe('Convert Lat/Lon to UTM', function(){
         chai.assert.equal(true, essentiallyEqual(west, result.west, 0.0001));
       });
     });
-  });
-  describe('UPS conversions', () => {
-    describe('to LL', () => {
-      it('convert north pole', ()=> {
-        const ups = converter.convertToUTMUPS(90, 0)
-        chai.assert.equal("Z 2000000mE 2000000mN", ups)
-      })
-      it('convert just above 84N', ()=> {
-        const ups = converter.convertToUTMUPS(84.01, 0)
-        chai.assert.equal("Z 2000000mE 1334385mN", ups)
-      })
-      it('convert just above 84N with different longitude', ()=> {
-        const ups = converter.convertToUTMUPS(84.01, 15)
-        chai.assert.equal("Z 2172273mE 1357065mN", ups)
-      })
-      it('convert further above 84N', ()=> {
-        const ups = converter.convertToUTMUPS(87, 0)
-        chai.assert.equal("Z 2000000mE 1666855mN", ups)
-      })
-      it('convert further above 84N with different longitude', ()=> {
-        const ups = converter.convertToUTMUPS(87, 15)
-        chai.assert.equal("Z 2086224mE 1678207mN", ups)
-      })
-      it('convert just below 80S', ()=> {
-        const ups = converter.convertToUTMUPS(-80.01, 0)
-        chai.assert.equal("B 2000000mE 3111832mN", ups)
-      })
-      it('convert just below 80S with different longitude', ()=> {
-        const ups = converter.convertToUTMUPS(-80.01, 15)
-        chai.assert.equal("B 2287763mE 3073947mN", ups)
-      })
-      it('convert further below 80S', ()=> {
-        const ups = converter.convertToUTMUPS(-85, 0)
-        chai.assert.equal("B 2000000mE 2555457mN", ups)
-      })
-      it('convert further below 80S with a different longitude', ()=> {
-        const ups = converter.convertToUTMUPS(-85, 15)
-        chai.assert.equal("B 2143762mE 2536530mN", ups)
-      })
-      describe('test longitude increments of 7.5 degrees', ()=> {
-        it('convert below 80S at 0 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 0)
-          chai.assert.equal("B 2000000mE 2555457mN", ups)
-        })
-        it('convert below 80S at 7.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 7.5)
-          chai.assert.equal("B 2072501mE 2550705mN", ups)
-        })
-        it('convert below 80S at 15 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 15)
-          chai.assert.equal("B 2143762mE 2536530mN", ups)
-        })
-        it('convert below 80S at 22.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 22.5)
-          chai.assert.equal("B 2212564mE 2513175mN", ups)
-        })
-        it('convert below 80S at 30 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 30)
-          chai.assert.equal("B 2277728mE 2481040mN", ups)
-        })
-        it('convert below 80S at 37.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 37.5)
-          chai.assert.equal("B 2338141mE 2440673mN", ups)
-        })
-        it('convert below 80S at 45 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 45)
-          chai.assert.equal("B 2392767mE 2392767mN", ups)
-        })
-        it('convert below 80S at 52.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 52.5)
-          chai.assert.equal("B 2440673mE 2338141mN", ups)
-        })
-        it('convert below 80S at 60 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 60)
-          chai.assert.equal("B 2481040mE 2277728mN", ups)
-        })
-        it('convert below 80S at 67.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 67.5)
-          chai.assert.equal("B 2513175mE 2212564mN", ups)
-        })
-        it('convert below 80S at 75 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 75)
-          chai.assert.equal("B 2536530mE 2143762mN", ups)
-        })
-        it('convert below 80S at 82.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 82.5)
-          chai.assert.equal("B 2550705mE 2072501mN", ups)
-        })
-        it('convert below 80S at 90 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 90)
-          chai.assert.equal("B 2555457mE 2000000mN", ups)
-        })
-        it('convert below 80S at 97.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 97.5)
-          chai.assert.equal("B 2550705mE 1927498mN", ups)
-        })
-        it('convert below 80S at 105 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 105)
-          chai.assert.equal("B 2536530mE 1856237mN", ups)
-        })
-        it('convert below 80S at 112.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 112.5)
-          chai.assert.equal("B 2513175mE 1787435mN", ups)
-        })
-        it('convert below 80S at 120 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 120)
-          chai.assert.equal("B 2481040mE 1722271mN", ups)
-        })
-        it('convert below 80S at 127.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 127.5)
-          chai.assert.equal("B 2440673mE 1661858mN", ups)
-        })
-        it('convert below 80S at 135 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 135)
-          chai.assert.equal("B 2392767mE 1607232mN", ups)
-        })
-        it('convert below 80S at 142.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 142.5)
-          chai.assert.equal("B 2338141mE 1559326mN", ups)
-        })
-        it('convert below 80S at 150 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 150)
-          chai.assert.equal("B 2277728mE 1518959mN", ups)
-        })
-        it('convert below 80S at 157.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 157.5)
-          chai.assert.equal("B 2212564mE 1486824mN", ups)
-        })
-        it('convert below 80S at 165 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 165)
-          chai.assert.equal("B 2143762mE 1463469mN", ups)
-        })
-        it('convert below 80S at 172.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 172.5)
-          chai.assert.equal("B 2072501mE 1449294mN", ups)
-        })
-        it('convert below 80S at 180 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, 180)
-          chai.assert.equal("B 2000000mE 1444542mN", ups)
-        })
-        it('convert below 80S at -7.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -7.5)
-          chai.assert.equal("A 1927498mE 2550705mN", ups)
-        })
-        it('convert below 80S at -15 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -15)
-          chai.assert.equal("A 1856237mE 2536530mN", ups)
-        })
-        it('convert below 80S at -22.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -22.5)
-          chai.assert.equal("A 1787435mE 2513175mN", ups)
-        })
-        it('convert below 80S at -30 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -30)
-          chai.assert.equal("A 1722271mE 2481040mN", ups)
-        })
-        it('convert below 80S at -37.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -37.5)
-          chai.assert.equal("A 1661858mE 2440673mN", ups)
-        })
-        it('convert below 80S at -45 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -45)
-          chai.assert.equal("A 1607232mE 2392767mN", ups)
-        })
-        it('convert below 80S at -52.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -52.5)
-          chai.assert.equal("A 1559326mE 2338141mN", ups)
-        })
-        it('convert below 80S at -60 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -60)
-          chai.assert.equal("A 1518959mE 2277728mN", ups)
-        })
-        it('convert below 80S at -67.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -67.5)
-          chai.assert.equal("A 1486824mE 2212564mN", ups)
-        })
-        it('convert below 80S at -75 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -75)
-          chai.assert.equal("A 1463469mE 2143762mN", ups)
-        })
-        it('convert below 80S at -82.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -82.5)
-          chai.assert.equal("A 1449294mE 2072501mN", ups)
-        })
-        it('convert below 80S at -90 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -90)
-          chai.assert.equal("A 1444542mE 2000000mN", ups)
-        })
-        it('convert below 80S at -97.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -97.5)
-          chai.assert.equal("A 1449294mE 1927498mN", ups)
-        })
-        it('convert below 80S at -105 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -105)
-          chai.assert.equal("A 1463469mE 1856237mN", ups)
-        })
-        it('convert below 80S at -112.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -112.5)
-          chai.assert.equal("A 1486824mE 1787435mN", ups)
-        })
-        it('convert below 80S at -120 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -120)
-          chai.assert.equal("A 1518959mE 1722271mN", ups)
-        })
-        it('convert below 80S at -127.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -127.5)
-          chai.assert.equal("A 1559326mE 1661858mN", ups)
-        })
-        it('convert below 80S at -135 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -135)
-          chai.assert.equal("A 1607232mE 1607232mN", ups)
-        })
-        it('convert below 80S at -142.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -142.5)
-          chai.assert.equal("A 1661858mE 1559326mN", ups)
-        })
-        it('convert below 80S at -150 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -150)
-          chai.assert.equal("A 1722271mE 1518959mN", ups)
-        })
-        it('convert below 80S at -157.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -157.5)
-          chai.assert.equal("A 1787435mE 1486824mN", ups)
-        })
-        it('convert below 80S at -165 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -165)
-          chai.assert.equal("A 1856237mE 1463469mN", ups)
-        })
-        it('convert below 80S at -172.5 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -172.5)
-          chai.assert.equal("A 1927498mE 1449294mN", ups)
-        })
-        it('convert below 80S at -180 latitude', ()=> {
-          const ups = converter.convertToUTMUPS(-85, -180)
-          chai.assert.equal("B 2000000mE 1444542mN", ups)
-        })
-      })
-      describe('convert to UTM when necessary', () => {
-        it('80S', ()=> {
-          const utm = converter.convertToUTMUPS(-80, 0)
-          chai.assert.equal("31C 441867mE 1116915mN", utm)
-        })
-        it('84N', ()=> {
-          const utm = converter.convertToUTMUPS(84, 0)
-          chai.assert.equal("31X 465005mE 9329005mN", utm)
-        })
-        it('0N', ()=> {
-          const utm = converter.convertToUTMUPS(0, 0)
-          chai.assert.equal("31N 166021mE 0mN", utm)
-        })
-      })
-    });
-    describe('from LL', () => {
-      const roundFloat= f => Math.round(f * 100) / 100
-      it('convert north pole', ()=> {
-        const longLat = converter.convertFromUTMUPS("Z 2000000mE 2000000mN")
-        chai.assert.equal(90, roundFloat(longLat[0]))
-        chai.assert.equal(0, roundFloat(longLat[1]))
-      })
-      it('convert just above 84N', ()=> {
-        const longLat = converter.convertFromUTMUPS("Z 2000000mE 1334385mN")
-        chai.assert.equal(84.01, roundFloat(longLat[0]))
-        chai.assert.equal(0, roundFloat(longLat[1]))
-      })
-      it('convert just above 84N with different longitude', ()=> {
-        const longLat = converter.convertFromUTMUPS("Z 2172273mE 1357065mN")
-        chai.assert.equal(84.01, roundFloat(longLat[0]))
-        chai.assert.equal(15, roundFloat(longLat[1]))
-      })
-      it('convert further above 84N', ()=> {
-        const longLat = converter.convertFromUTMUPS("Z 2000000mE 1666855mN")
-        chai.assert.equal(87, roundFloat(longLat[0]))
-        chai.assert.equal(0, roundFloat(longLat[1]))
-      })
-      it('convert further above 84N with different longitude', ()=> {
-        const longLat = converter.convertFromUTMUPS("Z 2086224mE 1678207mN")
-        chai.assert.equal(87, roundFloat(longLat[0]))
-        chai.assert.equal(15, roundFloat(longLat[1]))
-      })
-      it('convert just below 80S', ()=> {
-        const longLat = converter.convertFromUTMUPS("B 2000000mE 3111832mN")
-        chai.assert.equal(-80.01, roundFloat(longLat[0]))
-        chai.assert.equal(0, roundFloat(longLat[1]))
-      })
-      it('convert just below 80S with different longitude', ()=> {
-        const longLat = converter.convertFromUTMUPS("B 2287763mE 3073947mN")
-        chai.assert.equal(-80, roundFloat(longLat[0]))
-        chai.assert.equal(15, roundFloat(longLat[1]))
-      })
-      it('convert further below 80S', ()=> {
-        const longLat = converter.convertFromUTMUPS("B 2000000mE 2555457mN")
-        chai.assert.equal(-85, roundFloat(longLat[0]))
-        chai.assert.equal(0, roundFloat(longLat[1]))
-      })
-      it('convert further below 80S with a different longitude', ()=> {
-        const longLat = converter.convertFromUTMUPS("B 2143762mE 2536530mN")
-        chai.assert.equal(-85, roundFloat(longLat[0]))
-        chai.assert.equal(15, roundFloat(longLat[1]))
-      })
-      describe('test four corners in UPS square', ()=> {
-        it('convert Z 2400000mE 2400000mN', ()=>{
-          const longLat = converter.convertFromUTMUPS("Z 2400000mE 2400000mN")
-          chai.assert.equal(84.91, roundFloat(longLat[0]))
-          chai.assert.equal(135, roundFloat(longLat[1]))
-        })
-        it('convert Y 1400000mE 1400000mN', ()=>{
-          const longLat = converter.convertFromUTMUPS("Y 1400000mE 1400000mN")
-          chai.assert.equal(82.37, roundFloat(longLat[0]))
-          chai.assert.equal(-45, roundFloat(longLat[1]))
-        })
-        it('convert Y 1600000mE 2400000mN', ()=>{
-          const longLat = converter.convertFromUTMUPS("Y 1600000mE 2400000mN")
-          chai.assert.equal(84.91, roundFloat(longLat[0]))
-          chai.assert.equal(-135, roundFloat(longLat[1]))
-        })
-        it('convert Z 2400000mE 1600000mN', ()=>{
-          const longLat = converter.convertFromUTMUPS("Z 2400000mE 1600000mN")
-          chai.assert.equal(84.91, roundFloat(longLat[0]))
-          chai.assert.equal(45, roundFloat(longLat[1]))
-        })
-      })
-      describe('convert from UTM when necessary', () => {
-        it('80S', ()=> {
-          const longLat = converter.convertFromUTMUPS("31C 441867mE 1116915mN")
-          chai.assert.equal(80, roundFloat(longLat[0]))
-          chai.assert.equal(0, roundFloat(longLat[1]))
-        })
-        it('84N', ()=> {
-          const longLat = converter.convertFromUTMUPS("31X 465005mE 9329005m")
-          chai.assert.equal(84, roundFloat(longLat[0]))
-          chai.assert.equal(0, roundFloat(longLat[1]))
-        })
-        it('0N', ()=> {
-          const longLat = converter.convertFromUTMUPS("31N 166021mE 0m")
-          chai.assert.equal(0, roundFloat(longLat[0]))
-          chai.assert.equal(0, roundFloat(longLat[1]))
-        })
-      })
-    })
   });
 });
