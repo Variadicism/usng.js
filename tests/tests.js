@@ -1325,6 +1325,22 @@ describe('UPS Conversions', () => {
         chai.expect(utm.substr(0, expected.length)).to.equal(expected)
       })
     })
+    describe('convert to UPS when necessary', () => {
+      it('north of 84N', ()=> {
+        const ups = converter.convertToUTMUPS(85.1, 125.13)
+        chai.expect(ups).to.contain("231322")
+        chai.expect(ups).to.contain("244518")
+        chai.expect(ups).to.contain("mE")
+        chai.expect(ups).to.contain("mN")
+      })
+      it('south of 80S', ()=> {
+        const ups = converter.convertToUTMUPS(-85.1, -125.13)
+        chai.expect(ups).to.contain("168677")
+        chai.expect(ups).to.contain("155481")
+        chai.expect(ups).to.contain("mE")
+        chai.expect(ups).to.contain("mN")
+      })
+    })
   });
   describe('convertFromUTMUPS', () => {
     describe('convert from UTM when necessary', () => {
@@ -1343,6 +1359,19 @@ describe('UPS Conversions', () => {
         const longLat = converter.convertFromUTMUPS("31N 166021mE 0m")
         chai.expect(longLat[0]).to.be.closeTo(0, range)
         chai.expect(longLat[1]).to.be.closeTo(0, range)
+      })
+    })
+    describe('convert from UPS when necessary', () => {
+      const range = 0.5
+      it('north of 84N', ()=> {
+        const longLat = converter.convertFromUTMUPS("Z 2445183mE 2313228mN")
+        chai.expect(longLat[0]).to.be.closeTo(85.1, range)
+        chai.expect(longLat[1]).to.be.closeTo(125.13, range)
+      })
+      it('south of 80S', ()=> {
+        const longLat = converter.convertFromUTMUPS("A 1554816mE 1686771mN")
+        chai.expect(longLat[0]).to.be.closeTo(-85.1, range)
+        chai.expect(longLat[1]).to.be.closeTo(-125.13, range)
       })
     })
   })
