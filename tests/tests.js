@@ -2040,7 +2040,7 @@ describe('Convert Lat/Lon to UTM', function(){
         })
       })
     });
-    describe('from LL', () => () {
+    describe('from LL', () => {
       const roundFloat= f => Math.round(f * 100) / 100
       it('convert north pole', ()=> {
         const longLat = converter.convertFromUTMUPS("Z 2000000mE 2000000mN")

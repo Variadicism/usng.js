@@ -449,10 +449,10 @@
 
         convertFromUTMUPS(str) {
             const [zone] = str.split(" ")
-            if(["A","B","Y","Z"].includes(zone)) { return UPStoLL(deserializeUPS(str)) }
+            if(["A","B","Y","Z"].includes(zone)) { return this.UPStoLL(this.deserializeUPS(str)) }
             else {
-                const {zoneNumber, easting, northing} = deserializeUTM(str)
-                return UTMtoLL(easting, northing, zoneNumber)
+                const {zoneNumber, easting, northing} = this.deserializeUTM(str)
+                return this.UTMtoLL(easting, northing, zoneNumber)
             }
         },
         
@@ -462,7 +462,7 @@
                 throw new Error(`usng.js, LLtoUTMUPS, invalid input. lat: ${lat.toFixed(4)} lon: ${lon.toFixed(4)}`);
             }
              // Constrain reporting UTM coords to the latitude range [80S .. 84N]
-            return (lat > 84.0 || lat < -80.0) ? serializeUPS(LLtoUPS(lat, lon)) : serializeUTM(LLtoUTM(lat, lon))
+            return (lat > 84.0 || lat < -80.0) ? this.serializeUPS(this.LLtoUPS(lat, lon)) : this.serializeUTM(this.LLtoUTM(lat, lon))
         },
 
         /***************** convert latitude, longitude to USNG  *******************
