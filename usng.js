@@ -46,6 +46,41 @@
     }
 }(this, function (root, usngs) {
 
+    function eatanhe(x) {
+        return this.es * Math.atanh(this.es * x)
+    }
+
+    function taupf(tauValue) {
+        const tau1 = Math.hypot(1.0, tauValue)
+        const sig = Math.sinh(eatanhe.call(this, tauValue / tau1))
+        return Math.hypot(1.0, sig) * tauValue - sig * tau1
+    }
+
+    function tauf(taupValue) {
+        const e2m = 1 - Math.pow(this.es, 2)
+            // To lowest order in e^2, taup = (1 - e^2) * tau = _e2m * tau; so use
+            // tau = taup/_e2m as a starting guess.  (This starting guess is the
+            // geocentric latitude which, to first order in the flattening, is equal
+            // to the conformal latitude.)  Only 1 iteration is needed for |lat| <
+            // 3.35 deg, otherwise 2 iterations are needed.  If, instead, tau = taup
+            // is used the mean number of iterations increases to 1.99 (2 iterations
+            // are needed except near tau = 0).
+        let tau = taupValue/e2m
+        const stol = Math.sqrt(Number.EPSILON) / 10 * Math.max(1, Math.abs(taupValue))
+        // min iterations = 1, max iterations = 2; mean = 1.94; 5 iterations panic
+        for (let i = 0; i < 5; ++i) {
+            const taupa = taupf.call(this, tau)
+            const dtau = (taupValue - taupa) *
+                (1 + e2m * Math.pow(tau, 2)) /
+                ( e2m * Math.hypot(1, tau) * Math.hypot(1, taupa) )
+            tau += dtau
+            if (!(Math.abs(dtau) >= stol)) {
+                break
+            }
+        }
+        return tau
+    }
+
     function extend(objToExtend, obj) {
         var keys = [];
         for (var key in obj) {
@@ -89,6 +124,16 @@
 
         // scale factor of central meridian
         k0: 0.9996,
+
+        // UPS conversion constants re: GeographicLib
+        a: 6378137,
+        es: 0.08181918271,
+        c: 1.00336,
+        rhoAdjusterValue: 12637275.1116,
+        falseUPSNorthing: 2000000,
+        falseUPSEasting: 2000000,
+        SQ_MAX_EPSILON: 4.93038e-32,
+        SQ_MAX_EPSILON_DIV_10: this.SQ_MAX_EPSILON / 10,
 
         EQUATORIAL_RADIUS: undefined,
         ECC_PRIME_SQUARED: undefined,
@@ -396,7 +441,7 @@
         deserializeUPS(str) {
             const [zoneLetter, easting, northing] = str.split(" ")
             return {
-                northPole: (["Y", "Z"].includes(zoneLetter)) ? true : false,
+                northPole: (["Y", "Z"].includes(zoneLetter.toUpperCase())),
                 easting: Number(easting.slice(0, -2)),
                 northing: Number(northing.slice(0, -2))
             }
@@ -412,45 +457,68 @@
         { northing: number, easting: number, northPole: bool }
         ***************************************************************************/
         LLtoUPS: function(lat, lon) {
-            const a = 6378137;
-            const f = 0.00335281;
-            const k0 = 0.994;
-            const e2 = f * (2 - f);
-            const es = (f < 0 ? -1 : 1) * Math.sqrt(Math.abs(e2));
-            const c = 1.00336;
-
-            const falseNorthing = 2000000;
-            const falseEasting = 2000000;
-
-            const eatanhe = x => es * Math.atanh(es * x);
-
-            const taupf = tau => {
-              const tau1 = Math.hypot(1, tau);
-              const sig = Math.sinh(eatanhe(tau / tau1));
-              return Math.hypot(1, sig) * tau - sig * tau1;
-            }
-
-            const northp = lat > 0;
-            const tau = Math.tan(Math.abs(lat) * this.DEG_2_RAD);
-            const secphi = Math.hypot(1, tau);
-            const taup = taupf(tau, es);
-            let rho = Math.hypot(1, taup) + Math.abs(taup);
-            rho = taup >= 0 ? (Math.abs(lat) !== 90 ? 1/rho : 0) : rho;
-            rho *= 2 * k0 * a / c;
-            const x = Math.sin(lon * this.DEG_2_RAD) * rho;
-            const y = Math.cos(lon * this.DEG_2_RAD) * (northp ? -rho : rho);
-
+            const northPole = lat > 0
+            const tau = Math.tan(Math.abs(lat) * this.DEG_2_RAD)
+            const taup = taupf.call(this, tau)
+            const rhoStep1 = Math.hypot(1, taup) + Math.abs(taup)
+            const rhoStep2 = taup >= 0
+                ? (Math.abs(lat) !== 90
+                    ? 1/rhoStep1
+                    : 0)
+                : rhoStep1
+            const rho = rhoStep2 * this.rhoAdjusterValue
+            const x = Math.sin(lon * this.DEG_2_RAD) * rho
+            const y = Math.cos(lon * this.DEG_2_RAD) * (northPole ? -rho : rho)
             return {
-                northing: y + falseNorthing,
-                easting: x + falseEasting,
-                northPole: northp
+                northing: y + this.falseUPSNorthing,
+                easting: x + this.falseUPSEasting,
+                northPole: northPole
             };
+        },
+
+        // TODO:  doc comments here
+        UPStoLL: function (upsCoordinates) {
+            const validateUPSCoordinates = () => {
+                const processInvalidUPS = () => {
+                    throw new Error( 'Invalid UPS object: ' + JSON.stringify(upsCoordinates))
+                }
+                const processValidUPS  = () => {
+                    const adjustedUPS = {
+                        northPole: upsCoordinates.northPole,
+                        northing: upsCoordinates.northing - this.falseUPSNorthing,
+                        easting: upsCoordinates.easting - this.falseUPSEasting
+                    }
+                    const rho = Math.hypot(adjustedUPS.easting, adjustedUPS.northing)
+                    const t = rho !== 0.0
+                        ? rho / this.rhoAdjusterValue
+                        : Math.pow(Number.EPSILON, 2)
+                    const taup = (1 / t - t) / 2
+                    const tau = tauf.call(this, taup)
+                    const lat = (adjustedUPS.northPole ? 1 : -1) * Math.atan(tau) * this.RAD_2_DEG
+                    const lon = Math.atan2(
+                        adjustedUPS.easting,
+                        adjustedUPS.northPole ? -adjustedUPS.northing: adjustedUPS.northing) *
+                        this.RAD_2_DEG
+                    return {
+                        latitude: lat,
+                        longitude: lon
+                    }
+                }
+                const isUPSValid = typeof upsCoordinates === "undefined"
+                return {
+                    processConversion: isUPSValid
+                        ? processInvalidUPS
+                        : processValidUPS
+                }
+            }
+            return validateUPSCoordinates().processConversion()
         },
 
         convertFromUTMUPS(str) {
             const [zone] = str.split(" ")
-            if(["A","B","Y","Z"].includes(zone)) { return this.UPStoLL(this.deserializeUPS(str)) }
-            else {
+            if(["A","B","Y","Z"].includes(zone)) {
+                return this.UPStoLL(this.deserializeUPS(str))
+            } else {
                 const {zoneNumber, easting, northing} = this.deserializeUTM(str)
                 return this.UTMtoLL(easting, northing, zoneNumber)
             }
