@@ -500,8 +500,8 @@
                         adjustedUPS.northPole ? -adjustedUPS.northing: adjustedUPS.northing) *
                         this.RAD_2_DEG
                     return {
-                        latitude: lat,
-                        longitude: lon
+                        lat: lat,
+                        lon: lon
                     }
                 }
                 const isUPSValid = typeof upsCoordinates === "undefined"
@@ -520,7 +520,7 @@
                 return this.UPStoLL(this.deserializeUPS(str))
             } else {
                 const {zoneNumber, easting, northing} = this.deserializeUTM(str)
-                return this.UTMtoLL(easting, northing, zoneNumber)
+                return this.UTMtoLL(northing, easting, zoneNumber)
             }
         },
         

@@ -1188,122 +1188,122 @@ describe('UPS Conversions', () => {
   describe('UPStoLL', () => {
     const range = 0.5
     it('convert north pole', ()=> {
-      const longLat = converter.UPStoLL({
+      const { lat, lon } = converter.UPStoLL({
         northing: 2000000,
         easting: 2000000,
         northPole: true
       });
-      chai.expect(longLat[0]).to.be.closeTo(90, range)
+      chai.expect(lat).to.be.closeTo(90, range)
       // Longitude is irrelevant at the poles
     })
     it('convert just above 84N', ()=> {
-      const longLat = converter.UPStoLL({
+      const { lat, lon } = converter.UPStoLL({
         northing: 1334385,
         easting: 2000000,
         northPole: true
       });
-      chai.expect(longLat[0]).to.be.closeTo(84.01, range)
-      chai.expect(longLat[1]).to.be.closeTo(0, range)
+      chai.expect(lat).to.be.closeTo(84.01, range)
+      chai.expect(lon).to.be.closeTo(0, range)
     })
     it('convert just above 84N with different longitude', ()=> {
-      const longLat = converter.UPStoLL({
+      const { lat, lon } = converter.UPStoLL({
         northing: 1357065,
         easting: 2172273,
         northPole: true
       });
-      chai.expect(longLat[0]).to.be.closeTo(84.01, range)
-      chai.expect(longLat[1]).to.be.closeTo(15, range)
+      chai.expect(lat).to.be.closeTo(84.01, range)
+      chai.expect(lon).to.be.closeTo(15, range)
     })
     it('convert further above 84N', ()=> {
-      const longLat = converter.UPStoLL({
+      const { lat, lon } = converter.UPStoLL({
         northing: 1666855,
         easting: 2000000,
         northPole: true
       });
-      chai.expect(longLat[0]).to.be.closeTo(87, range)
-      chai.expect(longLat[1]).to.be.closeTo(0, range)
+      chai.expect(lat).to.be.closeTo(87, range)
+      chai.expect(lon).to.be.closeTo(0, range)
     })
     it('convert further above 84N with different longitude', ()=> {
-      const longLat = converter.UPStoLL({
+      const { lat, lon } = converter.UPStoLL({
         northing: 1678207,
         easting: 2086224,
         northPole: true
       });
-      chai.expect(longLat[0]).to.be.closeTo(87, range)
-      chai.expect(longLat[1]).to.be.closeTo(15, range)
+      chai.expect(lat).to.be.closeTo(87, range)
+      chai.expect(lon).to.be.closeTo(15, range)
     })
     it('convert just below 80S', ()=> {
-      const longLat = converter.UPStoLL({
+      const { lat, lon } = converter.UPStoLL({
         northing: 3111832,
         easting: 2000000,
         northPole: false
       });
-      chai.expect(longLat[0]).to.be.closeTo(-80.01, range)
-      chai.expect(longLat[1]).to.be.closeTo(0, range)
+      chai.expect(lat).to.be.closeTo(-80.01, range)
+      chai.expect(lon).to.be.closeTo(0, range)
     })
     it('convert just below 80S with different longitude', ()=> {
-      const longLat = converter.UPStoLL({
+      const { lat, lon } = converter.UPStoLL({
         northing: 3073947,
         easting: 2287763,
         northPole: false
       });
-      chai.expect(longLat[0]).to.be.closeTo(-80, range)
-      chai.expect(longLat[1]).to.be.closeTo(15, range)
+      chai.expect(lat).to.be.closeTo(-80, range)
+      chai.expect(lon).to.be.closeTo(15, range)
     })
     it('convert further below 80S', ()=> {
-      const longLat = converter.UPStoLL({
+      const { lat, lon } = converter.UPStoLL({
         northing: 2555457,
         easting: 2000000,
         northPole: false
       });
-      chai.expect(longLat[0]).to.be.closeTo(-85, range)
-      chai.expect(longLat[1]).to.be.closeTo(0, range)
+      chai.expect(lat).to.be.closeTo(-85, range)
+      chai.expect(lon).to.be.closeTo(0, range)
     })
     it('convert further below 80S with a different longitude', ()=> {
-      const longLat = converter.UPStoLL({
+      const { lat, lon } = converter.UPStoLL({
         northing: 2536530,
         easting: 2143762,
         northPole: false
       });
-      chai.expect(longLat[0]).to.be.closeTo(-85, range)
-      chai.expect(longLat[1]).to.be.closeTo(15, range)
+      chai.expect(lat).to.be.closeTo(-85, range)
+      chai.expect(lon).to.be.closeTo(15, range)
     })
     describe('test four corners in UPS square', ()=> {
       it('convert Z 2400000mE 2400000mN', ()=>{
-        const longLat = converter.UPStoLL({
+        const { lat, lon } = converter.UPStoLL({
           northing: 2400000,
           easting: 2400000,
           northPole: true
         });
-        chai.expect(longLat[0]).to.be.closeTo(84.91, range)
-        chai.expect(longLat[1]).to.be.closeTo(135, range)
+        chai.expect(lat).to.be.closeTo(84.91, range)
+        chai.expect(lon).to.be.closeTo(135, range)
       })
       it('convert Y 1400000mE 1400000mN', ()=>{
-        const longLat = converter.UPStoLL({
+        const { lat, lon } = converter.UPStoLL({
           northing: 1400000,
           easting: 1400000,
           northPole: true
         });
-        chai.expect(longLat[0]).to.be.closeTo(82.37, range)
-        chai.expect(longLat[1]).to.be.closeTo(-45, range)
+        chai.expect(lat).to.be.closeTo(82.37, range)
+        chai.expect(lon).to.be.closeTo(-45, range)
       })
       it('convert Y 1600000mE 2400000mN', ()=>{
-        const longLat = converter.UPStoLL({
+        const { lat, lon } = converter.UPStoLL({
           northing: 2400000,
           easting: 1600000,
           northPole: true
         });
-        chai.expect(longLat[0]).to.be.closeTo(84.91, range)
-        chai.expect(longLat[1]).to.be.closeTo(-135, range)
+        chai.expect(lat).to.be.closeTo(84.91, range)
+        chai.expect(lon).to.be.closeTo(-135, range)
       })
       it('convert Z 2400000mE 1600000mN', ()=>{
-        const longLat = converter.UPStoLL({
+        const { lat, lon } = converter.UPStoLL({
           northing: 1600000,
           easting: 2400000,
           northPole: true
         });
-        chai.expect(longLat[0]).to.be.closeTo(84.91, range)
-        chai.expect(longLat[1]).to.be.closeTo(45, range)
+        chai.expect(lat).to.be.closeTo(84.91, range)
+        chai.expect(lon).to.be.closeTo(45, range)
       })
     })
   })
@@ -1346,32 +1346,32 @@ describe('UPS Conversions', () => {
     describe('convert from UTM when necessary', () => {
       const range = 0.5
       it('80S', ()=> {
-        const longLat = converter.convertFromUTMUPS("31 441867mE 1116915mN")
-        chai.expect(longLat[0]).to.be.closeTo(80, range)
-        chai.expect(longLat[1]).to.be.closeTo(0, range)
+        const { lat, lon } = converter.convertFromUTMUPS("31 441867mE 1116915mN")
+        chai.expect(lat).to.be.closeTo(-80, range)
+        chai.expect(lon).to.be.closeTo(0, range)
       })
       it('84N', ()=> {
-        const longLat = converter.convertFromUTMUPS("31 465005mE 9329005m")
-        chai.expect(longLat[0]).to.be.closeTo(84, range)
-        chai.expect(longLat[1]).to.be.closeTo(0, range)
+        const { lat, lon } = converter.convertFromUTMUPS("31 465005mE 9329005mN")
+        chai.expect(lat).to.be.closeTo(84, range)
+        chai.expect(lon).to.be.closeTo(0, range)
       })
       it('0N', ()=> {
-        const longLat = converter.convertFromUTMUPS("31 166021mE 0m")
-        chai.expect(longLat[0]).to.be.closeTo(0, range)
-        chai.expect(longLat[1]).to.be.closeTo(0, range)
+        const { lat, lon } = converter.convertFromUTMUPS("31 166021mE 0mN")
+        chai.expect(lat).to.be.closeTo(0, range)
+        chai.expect(lon).to.be.closeTo(0, range)
       })
     })
     describe('convert from UPS when necessary', () => {
       const range = 0.5
       it('north of 84N', ()=> {
-        const longLat = converter.convertFromUTMUPS("Z 2445183mE 2313228mN")
-        chai.expect(longLat[0]).to.be.closeTo(85.1, range)
-        chai.expect(longLat[1]).to.be.closeTo(125.13, range)
+        const { lat, lon } = converter.convertFromUTMUPS("Z 2445183mE 2313228mN")
+        chai.expect(lat).to.be.closeTo(85.1, range)
+        chai.expect(lon).to.be.closeTo(125.13, range)
       })
       it('south of 80S', ()=> {
-        const longLat = converter.convertFromUTMUPS("A 1554816mE 1686771mN")
-        chai.expect(longLat[0]).to.be.closeTo(-85.1, range)
-        chai.expect(longLat[1]).to.be.closeTo(-125.13, range)
+        const { lat, lon } = converter.convertFromUTMUPS("A 1554816mE 1686771mN")
+        chai.expect(lat).to.be.closeTo(-85.1, range)
+        chai.expect(lon).to.be.closeTo(-125.13, range)
       })
     })
   })
