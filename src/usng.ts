@@ -609,20 +609,29 @@ extend(Converter.prototype, {
     }
     return validateUPSCoordinates().processConversion()
   },
-
-  UTMUPStoLL(utmupsInput) {
-    const isInputString = typeof utmupsInput === "string"
+  
+  UTMUPSObjecttoLL(utmupsObject) {
     try {
-      const isInputStringUPS = isInputString
-        && includes(["A", "B", "Y", "Z"], utmupsInput.charAt(0).toUpperCase())
-      if (isInputStringUPS) {
-        return this.UPStoLL(isInputString ? this.deserializeUPS(utmupsInput) : utmupsInput)
+      const {northing, easting, zoneNumber} = utmupsObject
+    return zoneNumber == 0 
+      ? this.UPStoLL(utmupsObject)
+      : this.UTMtoLL(northing, easting, zoneNumber)
+    } catch {
+      throw new Error(`Invalid UTM/UPS Object: ${utmupsObject}`)
+    }
+    
+  },
+
+  UTMUPStoLL(utmupsString) {
+    try {
+      if (includes(["A", "B", "Y", "Z"], utmupsString.trim().charAt(0).toUpperCase())) {
+        return this.UPStoLL(this.deserializeUPS(utmupsString))
       } else {
-        const utm = isInputString ? this.deserializeUTM(utmupsInput) : utmupsInput;
-        return this.UTMtoLL(utm.northing, utm.easting, utm.zoneNumber)
+        const {northing, easting, zoneNumber} = this.deserializeUTM(utmupsString);
+        return this.UTMtoLL(northing, easting, zoneNumber)
       }
     } catch (err) {
-      throw new Error(`Invalid UTM/UPS input: ${utmupsInput}`)
+      throw new Error(`Invalid UTM/UPS String: ${utmupsString}`)
     }
   },
 
